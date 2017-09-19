@@ -1,0 +1,72 @@
+	section:nth-child(odd){
+		background-color: #222222;
+	}
+	section:nth-child(even){
+		background-color: #333333;
+	}
+    
+   
+    .box{
+
+        background: url("../images/resume_bg.jpg");
+        padding-bottom: 50px;
+    }
+
+#page2 p{
+    font-size: 19px;
+}
+.keywords{
+    color:#FF7000;
+    font-size: 22px;
+}
+.contact-box {
+    margin: 15px auto;
+    padding: 20px;
+    background-color: #00aadd;
+    width: 120px;
+    height: 120px;
+    border-radius: 120px;
+    text-align: center;
+    line-height: 100px;
+    box-shadow: -6px 6px 12px #000;
+    -webkit-transform: rotateY(180deg);
+    -moz-transform: rotateY(180deg);
+    -ms-transform: rotateY(180deg);
+    -o-transform: rotateY(180deg);
+    transform: rotateY(180deg);
+    -webkit-transition: transform 400ms ease-out 0s;
+    -moz-transition: transform 400ms ease-out 0s;
+    -o-transition: transform 400ms ease-out 0s;
+    transition: transform 400ms ease-out 0s;
+}
+.contact-box:hover {
+    -webkit-transform: rotateY(0deg);
+    -moz-transform: rotateY(0deg);
+    -ms-transform: rotateY(0deg);
+    -o-transform: rotateY(0deg);
+    transform: rotateY(0deg);
+}
+.contact-content{
+    margin-top: 15px;
+}
+.exper-box {
+    padding: 40px;
+    margin: 15px;
+    margin-left: -5px;
+    margin-right: -5px;
+    background-color: rgba(255, 255, 255, 0.75);
+    color: #333;
+    border-radius: 12px;
+    box-shadow: 6px 6px 12px #000;
+    display: none;
+    -webkit-transition: background-color 0.3s linear,border 0.3s linear;
+    -moz-transition: background-color 0.3s linear,border 0.3s linear;
+    -ms-transition: background-color 0.3s linear,border 0.3s linear;
+    -o-transition: background-color 0.3s linear,border 0.3s linear;
+    transition: background-color 0.3s linear,border 0.3s linear;
+}
+
+.exper-box:hover {
+    background-color: #00aadd;
+    color: #eee;
+}

@@ -1,0 +1,26 @@
+/*留言板部分*/
+.msg{
+		padding-top: 50px;
+	}
+input[type='submit']{
+	background:#fcfcfc;
+	color:#36bbce;
+	cursor:pointer;
+	transition: .3s;
+}
+input[type='submit']:hover{
+	background:#36bbce;
+	color:#fcfcfc;
+}
+input,textarea{
+	background-color:#FFF;
+	border:1px solid #fcfcfc;
+	border-radius:5px;
+	padding:3px 5px;
+	outline:none;
+	color:#333;
+}
+textarea{
+	width:590px;
+	resize:none;
+}
