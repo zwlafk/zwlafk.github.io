@@ -5,6 +5,7 @@ tags: [hexo,algolia]
 categories: web
 ---
 hexo中可以使用第三方的algolia作为搜索功能，在[next](http://theme-next.iissnan.com/third-party-services.html#algolia-search)主题下也有很好的支持，但是按照官网的说明跑了一边并不成功，发现有几点坑需要注意
+<!--more-->
 ## 更改algolia版本
 为了更好的使用，我们把algolia版本改为0.2.0，在package.json中找到依赖中的"hexo-algolia"字段改为
 ```

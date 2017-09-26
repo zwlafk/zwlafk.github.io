@@ -7,6 +7,7 @@ categories: web
 ## 设想
 最开始设想建立两个repo，一个repo1是hexo生成的项目，另一个repo2是写在这个项目deploy的配置中，这样只用管理repo1这个项目，每次用`hexo d`相当于更新repo2，达到不同机子上更新博客的目的，换了机子把repo1同步下来管理即可。
 看到网上有人说用一个repo两个分支，嗯，道理是一样的，这样也更加合理，决定采用这种方法。
+<!--more-->
 ## 实现
 * 在xxx.githbu.io这个个repo中建立两个分支
     * 一个分支为master
