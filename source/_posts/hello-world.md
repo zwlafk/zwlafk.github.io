@@ -5,8 +5,8 @@ categories: Web
 tags: [hexo]
 ---
 用[Hexo](https://hexo.io/) + [GitHub](https://github.com/hexojs/hexo/issues)搭建的博客.
-[文档](https://hexo.io/zh-cn/docs/index.html)很全.
-
+[文档](https://hexo.io/zh-cn/docs/index.html).
+<!--more-->
 ## 开始
 
 ### 创建 
