@@ -1,10 +1,10 @@
 ---
-title: “30秒代码”学习整理
+title: js“30秒代码”学习整理
 date: 2017-12-25 11:30:20
 tags: [javascript]
 categories: web
 ---
-GitHub上的[30-seconds-of-code](https://github.com/Chalarangelo/30-seconds-of-code)项目收集了大量的简短有用的js代码片段，本文是对该项目的学习笔记。（持续学习中。。）
+GitHub上的[30-seconds-of-code](https://github.com/Chalarangelo/30-seconds-of-code)项目收集了大量的简短有用的js代码片段，本文是对该项目的学习笔记。（持续更新）
 <!--more-->
 - 使用<kbd>Ctrl</kbd> + <kbd>F</kbd> 或 <kbd>command</kbd> + <kbd>F</kbd>搜索代码段。
 - 欢迎投稿, 请阅读[投稿指南](CONTRIBUTING.md)。
