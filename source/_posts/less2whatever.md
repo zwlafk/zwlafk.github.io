@@ -84,7 +84,7 @@ function fileWatcher(rootPath, suffix) {
 }
 module.exports = fileWatcher 
 ```
-当我们监听到less文件变化时，执行`compileFile`,通过`lessc`生成对应文件（所以我们这个工具使用前提是已经全局安装了less）（这样看来我好像啥也没干，核心功能是完全依赖less😂）   
+当我们监听到less文件变化时，执行`compileFile`,通过`lessc`生成对应文件（所以我们这个工具使用前提是已经全局安装了less）   
 到这里我们就已经实现了工具的全部功能，接下来是通过`npm publish`发布   
 在这之前我们先执行
 ```
