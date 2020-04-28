@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>#canvas</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+
+</head>
+
+<body>
+    <img src="./img.jpg" alt="">
+    <canvas id="canvas1"></canvas>
+    <script type="text/javascript">
+        var canvas = document.getElementById("canvas1");
+        var context = canvas.getContext("2d");
+        //创建image对象
+        var imgObj = new Image();
+        imgObj.src = './img.jpg';
+        //待图片加载完后，将其显示在canvas上
+        imgObj.onload = function () {
+            canvas.style.width = this.width + "px";
+            canvas.style.height = this.height + "px";
+            canvas.width = this.width;
+            canvas.height = this.height;
+            context.drawImage(this, 0, 0, this.width, this.height);//this即是imgObj,保持图片的原始大小
+            var modifyImgData = context.getImageData(0, 0, canvas.width, canvas.height);
+            var modifyPxData = modifyImgData.data;
+            let l = modifyPxData.length / 4;
+            for (let i = 0; i < l; i++) {
+                let r = modifyPxData[i * 4 + 0];
+                let g = modifyPxData[i * 4 + 1];
+                let b = modifyPxData[i * 4 + 2];
+                if (r > 100 && g > 120 && b > 120)
+                    modifyPxData[i * 4 + 3] = 100;
+            }
+            context.putImageData(modifyImgData, 0, 0);
+        }
+    </script>
+</body>
+
+</html>

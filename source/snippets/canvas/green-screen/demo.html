@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body style="display: flex;">
+    <div style="display: flex;flex-direction: column;background: #cccccc;">
+        <div style="display: flex;flex-direction: row;">
+            <div style="display: flex;flex-direction: column;">
+                <div>
+                    <p>视频素材1：</p>
+                    <video id="video1" src="./video.mp4" width="240" controls="true" crossorigin="anonymous"></video>
+                </div>
+                <div>
+                    <p>素材1每帧绘入canvas：</p>
+                    <canvas id="videoCanvas" width="240" height="136"></canvas>
+                </div>
+                <div>
+                    <p>去除每帧绿幕：</p>
+                    <canvas id="mattingCanvas" width="240" height="136"></canvas>
+                </div>
+            </div>
+            <div style="display: flex;flex-direction: column;justify-content: space-between;">
+                <div>
+                    <p>视频素材2：</p>
+                    <video id="video2" src="./inner-video.mp4" width="240" controls="true"
+                        crossorigin="anonymous"></video>
+                </div>
+                <div>
+                    <p>素材2每帧绘入canvas：</p>
+                    <canvas id="videoCanvas2" width="240" height="136"></canvas>
+                </div>
+
+            </div>
+        </div>
+        <div style="display: flex;justify-content: center;">
+            <div>
+                <p>合成效果：</p>
+                <canvas id="resultCanvas" width="240" height="136"></canvas>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        let video1 = document.getElementById('video1')
+        let video2 = document.getElementById('video2')
+        let videoCanvas = document.getElementById('videoCanvas')
+        let videoContext1 = videoCanvas.getContext('2d')
+        let videoCanvas2 = document.getElementById('videoCanvas2')
+        let videoContext2 = videoCanvas2.getContext('2d')
+        let mattingCanvas = document.getElementById('mattingCanvas')
+        let mattingContext = mattingCanvas.getContext('2d')
+        let resultCanvas = document.getElementById('resultCanvas')
+        let resultContext = resultCanvas.getContext('2d')
+        function handlePlay() {
+            video1.play()
+            video2.play()
+            timerCallback()
+        }
+        function handlePause() {
+            video1.pause()
+            video2.pause()
+        }
+
+        function timerCallback() {
+            if (video1.paused || video1.ended) {
+                return;
+            }
+            computeFrame();
+            window.requestAnimationFrame(timerCallback)
+        }
+
+        function computeFrame() {
+            videoContext1.drawImage(video1, 0, 0, 240, 136);
+            let frame = videoContext1.getImageData(0, 0, 240, 136)
+            videoContext2.drawImage(video2, 0, 0, 240, 136);
+            let frame2 = videoContext2.getImageData(0, 0, 240, 136)
+            const length = frame.data.length / 4
+            for (let i = 0; i < length; i++) {
+                let r = frame.data[i * 4 + 0];
+                let g = frame.data[i * 4 + 1];
+                let b = frame.data[i * 4 + 2];
+                if (r < 150 && g > 180 && b < 130) {
+                    // 绿色部分设置完全透明
+                    frame.data[i * 4 + 3] = 0;
+                }
+            }
+            mattingContext.putImageData(frame, 0, 0)
+            resultContext.drawImage(videoCanvas2, 0, 0)
+            resultContext.drawImage(mattingCanvas, 0, 0)
+        }
+        video1.addEventListener('play', handlePlay)
+        video2.addEventListener('play', handlePlay)
+        video1.addEventListener('pause', handlePause)
+        video2.addEventListener('pause', handlePause)
+        videoContext1.drawImage(video1, 0, 0)
+    </script>
+</body>
+
+</html>

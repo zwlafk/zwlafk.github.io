@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>canvas</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://cdn.bootcss.com/stackblur-canvas/2.2.0/stackblur.min.js"></script>
+    <canvas id="canvas"></canvas>
+    <canvas id="upper-canvas" style="position: absolute; top: 0; left: 0;"></canvas>
+    <button id="download-btn">下载图片</button>
+    <script>
+        let upperCanvas = document.getElementById("upper-canvas"),
+            upperContext = upperCanvas.getContext("2d");
+        let x1, y1,//绘制路径的起点坐标
+            size = 15;
+
+        let canvas = document.getElementById("canvas"),
+            context = canvas.getContext("2d");
+        let img = new Image();
+        img.src = '../img.jpg';
+        img.onload = function () {
+            // 绘入原始图片
+            upperCanvas.style.width = this.width + "px";
+            upperCanvas.style.height = this.height + "px";
+            upperCanvas.width = this.width;
+            upperCanvas.height = this.height;
+            upperContext.drawImage(this, 0, 0, this.width, this.height);
+
+            // 模糊处理图片, 绘入底部canvas
+            canvas.style.width = this.width + "px";
+            canvas.style.height = this.height + "px";
+            canvas.width = this.width;
+            canvas.height = this.height;
+            context.filter = "blur(10px)";
+            context.drawImage(this, 0, 0, this.width, this.height);
+            // StackBlur.image(this, "canvas", 10);
+
+            tapClip();
+        };
+        function getClipArea(e, hastouch) {
+            let x = hastouch ? e.targetTouches[0].pageX : e.clientX;
+            let y = hastouch ? e.targetTouches[0].pageY : e.clientY;
+            let ndom = upperCanvas;
+            while (ndom.tagName !== "BODY") {
+                x -= ndom.offsetLeft;
+                y -= ndom.offsetTop;
+                ndom = ndom.parentNode;
+            }
+            return {
+                x: x,
+                y: y
+            };
+        }
+        function tapClip() {
+            let hastouch = "ontouchstart" in window ? true : false,
+                tapstart = hastouch ? "touchstart" : "mousedown",
+                tapmove = hastouch ? "touchmove" : "mousemove",
+                tapend = hastouch ? "touchend" : "mouseup";
+            let area;
+            let x2, y2;
+            upperContext.lineCap = "round";
+            upperContext.lineJoin = "round";
+            upperContext.lineWidth = size * 2;
+            upperContext.globalCompositeOperation = "destination-out";
+            upperCanvas.addEventListener(tapstart, function (e) {
+                e.preventDefault();
+                area = getClipArea(e, hastouch);
+                x1 = area.x;
+                y1 = area.y;
+                drawLine(x1, y1);
+                this.addEventListener(tapmove, tapmoveHandler);
+                this.addEventListener(tapend, function () {
+                    this.removeEventListener(tapmove, tapmoveHandler);
+                });
+                function tapmoveHandler(e) {
+                    e.preventDefault();
+                    area = getClipArea(e, hastouch);
+                    x2 = area.x;
+                    y2 = area.y;
+                    drawLine(x1, y1, x2, y2);
+                    x1 = x2;
+                    y1 = y2;
+                }
+            });
+        }
+        function drawLine(x1, y1, x2, y2) {
+            upperContext.beginPath();
+            if (arguments.length == 2) {
+                upperContext.arc(x1, y1, size, 0, 2 * Math.PI);
+                upperContext.fill();
+            } else {
+                upperContext.moveTo(x1, y1);
+                upperContext.lineTo(x2, y2);
+                upperContext.stroke();
+            }
+        }
+        let btn = document.getElementById('download-btn')
+        btn.onclick = function () {
+            // 创建隐藏的可下载链接
+            let eleLink = document.createElement('a');
+            eleLink.download = 'filename';
+            eleLink.style.display = 'none';
+            // 创建一个canvas作为临时容器
+            let tempCanvas = document.createElement('canvas');
+            let tempContext = tempCanvas.getContext('2d');
+            tempCanvas.width = upperCanvas.width;
+            tempCanvas.height = upperCanvas.height;
+            // 按顺序绘入两层canvas
+            tempContext.drawImage(canvas, 0, 0);
+            tempContext.drawImage(upperCanvas, 0, 0);
+            // 图片转base64地址
+            eleLink.href = tempCanvas.toDataURL('image/jpeg');
+            // 触发点击
+            document.body.appendChild(eleLink);
+            eleLink.click();
+            // 然后移除链接
+            document.body.removeChild(eleLink);
+        }
+    </script>
+</body>
+
+</html>

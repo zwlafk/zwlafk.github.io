@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>canvas</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 引入stackblur.js 处理高斯模糊区域-->
+    <script src="https://cdn.bootcss.com/stackblur-canvas/2.2.0/stackblur.min.js"></script>
+    <canvas id="canvas1"></canvas>
+    <script type="text/javascript">
+        var canvas = document.getElementById("canvas1");
+        var context = canvas.getContext("2d");
+        var imgObj = new Image();
+        imgObj.src = '../img.jpg';
+        //待图片加载完后，将其显示在canvas上
+        imgObj.onload = function () {
+            canvas.style.width = this.width + "px";
+            canvas.style.height = this.height + "px";
+            canvas.width = this.width;
+            canvas.height = this.height;
+            // 调用drawImage在canvas上绘制此图
+            context.drawImage(this, 0, 0, this.width, this.height);
+            // 开始监听鼠标事件
+            initEventListener();
+        }
+        function initEventListener() {
+            canvas.onmousedown = function (ev) {
+                var ev = ev || window.event;
+                var dx = ev.clientX - canvas.offsetLeft;
+                var dy = ev.clientY - canvas.offsetTop;
+                drawLine(dx, dy);
+                document.onmousemove = function (ev) {
+                    var ev = ev || window.event;
+                    var mx = ev.clientX - canvas.offsetLeft;
+                    var my = ev.clientY - canvas.offsetTop;
+                    drawLine(mx, my);
+                };
+                document.onmouseup = function () {
+                    document.onmousemove = null;
+                    document.onmouseup = null;
+                };
+            }
+        }
+        function drawLine(dx, dy) {
+            // 在canvas 距离左上角dx - 15, dy - 15的位置生成一个矩形高斯模糊区域，大小为30*30，模糊半径为10(模糊半径越大打码效果越强)
+            StackBlur.canvasRGBA(canvas, dx - 15, dy - 15, 30, 30, 10);
+        }
+    </script>
+</body>
+
+</html>
