@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="Hexo, 前端, js, javascript">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2">
+
+
+
+
+
+
+<meta name="description" content="【canvas】记一次图片打码需求调研去年的一次需求中涉及到图片打码功能，整理并记录当时的思路，以及后来的一些发散思考。    这里的打码都是指毛玻璃效果(高斯模糊)，不过根据我的思路马赛克或其他效果都是可以实现的 前言接下来我会以实现图片打码为目标介绍一些思路和技术方案，在文末还会介绍一些有趣的图像处理功能，都是基于调研过程中了解到的api实现的，比如抠图、千图成像、绿幕技术，感兴趣的话可以一起">
+<meta property="og:type" content="website">
+<meta property="og:title" content="哇噻">
+<meta property="og:url" content="https://zwlafk.github.io/snippets/canvas/README.html">
+<meta property="og:site_name" content="哇噻">
+<meta property="og:description" content="【canvas】记一次图片打码需求调研去年的一次需求中涉及到图片打码功能，整理并记录当时的思路，以及后来的一些发散思考。    这里的打码都是指毛玻璃效果(高斯模糊)，不过根据我的思路马赛克或其他效果都是可以实现的 前言接下来我会以实现图片打码为目标介绍一些思路和技术方案，在文末还会介绍一些有趣的图像处理功能，都是基于调研过程中了解到的api实现的，比如抠图、千图成像、绿幕技术，感兴趣的话可以一起">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8df51f021337d?w=382&h=396&f=jpeg&s=20823">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/16/16fac1538feb1839?w=819&h=432&f=gif&s=302292">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/9/16f897b2593246c0?w=906&h=804&f=jpeg&s=143842">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/9/16f897bedd4174df?w=860&h=152&f=jpeg&s=25460">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/9/16f897c328fd786a?w=854&h=160&f=jpeg&s=24407">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/9/16f898c2dc1ccbc6?w=288&h=144&f=jpeg&s=10032">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/9/16f897ba30591d0b?w=1082&h=1036&f=jpeg&s=210051">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/9/16f897cc1e355912?w=1088&h=1006&f=jpeg&s=202121">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/9/16f897f1fc0ef6a1?w=1084&h=654&f=jpeg&s=103857">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/9/16f897f77e181a62?w=1354&h=846&f=jpeg&s=176036">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/15/16fa81f21b0f5e09?w=839&h=451&f=gif&s=1289474">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/16/16fac2bb803e4a6f?w=1438&h=1572&f=jpeg&s=260602">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/9/16f8a1dff35481ef?w=2452&h=820&f=jpeg&s=902520">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/9/16f8a303b8f62948?w=472&h=761&f=gif&s=4363867">
+<meta property="og:updated_time" content="2020-04-28T10:50:10.018Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="哇噻">
+<meta name="twitter:description" content="【canvas】记一次图片打码需求调研去年的一次需求中涉及到图片打码功能，整理并记录当时的思路，以及后来的一些发散思考。    这里的打码都是指毛玻璃效果(高斯模糊)，不过根据我的思路马赛克或其他效果都是可以实现的 前言接下来我会以实现图片打码为目标介绍一些思路和技术方案，在文末还会介绍一些有趣的图像处理功能，都是基于调研过程中了解到的api实现的，比如抠图、千图成像、绿幕技术，感兴趣的话可以一起">
+<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8df51f021337d?w=382&h=396&f=jpeg&s=20823">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"hide","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'NX138MH7QL',
+      apiKey: '945f4cf08d7d451ed38143e208ea5784',
+      indexName: 'blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"搜索关键字","hits_empty":"啊偶，没有找到 ${query}","hits_stats":"找到了 ${hits} 条结果，耗时 ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://zwlafk.github.io/snippets/canvas/README.html">
+
+
+
+
+
+  <title> | 哇噻</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">哇噻</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/zwl/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+    
+    
+    <div class="post-block page">
+      <header class="post-header">
+
+	<h1 class="post-title" itemprop="name headline"></h1>
+
+
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+        
+        
+          <h1 id="【canvas】记一次图片打码需求调研"><a href="#【canvas】记一次图片打码需求调研" class="headerlink" title="【canvas】记一次图片打码需求调研"></a>【canvas】记一次图片打码需求调研</h1><p>去年的一次需求中涉及到图片打码功能，整理并记录当时的思路，以及后来的一些发散思考。   </p>
+<p><em>这里的打码都是指毛玻璃效果(高斯模糊)，不过根据我的思路马赛克或其他效果都是可以实现的</em></p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>接下来我会以实现图片打码为目标介绍一些思路和技术方案，在文末还会介绍一些有趣的图像处理功能，都是基于调研过程中了解到的api实现的，比如抠图、千图成像、绿幕技术，感兴趣的话可以一起了解下。</p>
+<p><em>文中斜体部分大多是在表述我自己的理解</em>   </p>
+<h3 id="canvas"><a href="#canvas" class="headerlink" title="canvas"></a>canvas</h3><blockquote>
+<p> HTML 的 \<canvas> 元素提供了一个空白绘图区域，可以使用 APIs （比如 Canvas 2D 或 WebGL）来绘制图形。   </canvas></p>
+</blockquote>
+<p>以上是<a href="https://developer.mozilla.org/zh-CN/docs/Glossary/Canvas" target="_blank" rel="noopener">MDN</a>对canvas的介绍，既然是用来绘制图形的，可能大部分同学并没有接触过此类需求，对canvas处于听过看过没用过的状态。   </p>
+<p>下面我来快速介绍一下如何用canvas在浏览器上绘制出一个图形，这样大家就都在同一起跑线上了。</p>
+<p>或者你可以在MDN上了解<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Basic_usage" target="_blank" rel="noopener">canvas的基本用法</a>然后跳过这部分。      </p>
+<h3 id="快速介绍"><a href="#快速介绍" class="headerlink" title="快速介绍"></a>快速介绍</h3><p><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D" target="_blank" rel="noopener">CanvasRenderingContext2D</a>(渲染上下文)是canvas的一个重要对象，通过在\<canvas>上调用getContext()并传入一个<code>&#39;2d&#39;</code>参数来获得，获得这个渲染上下文后就可以对该\<canvas>上进行绘制操作了。<br>所以在使用canvas绘图时，起手来一个getContext是必不可少的   </canvas></canvas></p>
+<p><em><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLCanvasElement/getContext" target="_blank" rel="noopener">getContext()</a>还可以传入<code>&#39;webgl&#39;</code>来获取三维上下文进行3d绘图。 既然\<canvas>是画布，我觉得这些上下文可以理解成画笔，2d画笔画2d，3d画笔画3d</canvas></em></p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">canvas</span> <span class="attr">id</span>=<span class="string">"tutorial"</span> <span class="attr">width</span>=<span class="string">"150"</span> <span class="attr">height</span>=<span class="string">"150"</span>&gt;</span><span class="tag">&lt;/<span class="name">canvas</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line">    let canvas = document.getElementById('tutorial');</span><br><span class="line">    let ctx = canvas.getContext('2d');</span><br><span class="line">    ctx.fillRect(25, 25, 100, 100);</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>上面这段代码就是获取canvas2d上下文后调用了<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/fillRect" target="_blank" rel="noopener">fillRect</a>在\<canvas>上绘制了一个矩形，位置在\<canvas>的左上起(25，25)处，长宽为100，默认颜色是#000   </canvas></canvas></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8df51f021337d?w=382&amp;h=396&amp;f=jpeg&amp;s=20823" alt><br>除了绘制矩形外，这个渲染上下文还提供了其他许多<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D" target="_blank" rel="noopener">API</a>用以实现各种绘图需求，比如绘制文本、<strong>绘制路径、绘制图像、像素控制</strong>、旋转变换等，接下来我只在用到的时候介绍他们。    </p>
+<h2 id="技术方案"><a href="#技术方案" class="headerlink" title="技术方案"></a>技术方案</h2><p>图片打码的需求简单描述下就是：通过浏览器上传一张图片，展示该图片后点击图片任何区域，该区域被打码，可以将打码后的图片保存或上传   </p>
+<p><em>高斯模糊的<a href="http://www.ruanyifeng.com/blog/2012/11/gaussian_blur.html" target="_blank" rel="noopener">原理及算法</a>这里就不介绍了，可以直接使用现成的库<a href="https://www.npmjs.com/package/stackblur-canvas" target="_blank" rel="noopener">stackblur</a>来处理，需要马赛克等其他效果也可以找到相应的库</em>   </p>
+<p>这就需要canvas能做到下面几点:    </p>
+<ol>
+<li>能把图片写入canvas</li>
+<li>能获取canvas指定位置的像素，能原地修改像素值更好</li>
+<li>能保存当前canvas为图片或base64数据   </li>
+</ol>
+<p>看一下<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D" target="_blank" rel="noopener">API列表</a>，初步思考技术方案：   </p>
+<ol>
+<li>用<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/drawImage" target="_blank" rel="noopener">drawImage()</a>将图片写入\<canvas>   </canvas></li>
+<li>用<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/getImageData" target="_blank" rel="noopener">getImageData()</a>获取像素数据，这里得到的数据中包含一个一维数组，数组的元素是图片所有像素点的rgba值，遍历这个数组，监听mousedown和mousemove事件，找到对应位置的像素点，计算并修改为打码后的新像素值，由于无法原地修改，所以修改之后需要重新调用drawImage，将打过码后的图像绘入\<canvas></canvas></li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLCanvasElement" target="_blank" rel="noopener">HTMLCanvasElement</a>提供了<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLCanvasElement/toDataURL" target="_blank" rel="noopener">canvas.toDataURL()</a>和<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLCanvasElement/toBlob" target="_blank" rel="noopener">canvas.toBlob()</a>方法，调用后可以获得当前画布中展示图像的base64数据或blob对象，可以用来展示或者下载上传   </li>
+</ol>
+<p><em>这里提到要用drawImage的地方都可以替换为<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/putImageData" target="_blank" rel="noopener">putImageData</a>，二者区别会在文末介绍</em></p>
+<p>根据上面的技术方案，落地成代码就是：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 引入stackblur.js 处理高斯模糊区域--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"https://cdn.bootcss.com/stackblur-canvas/2.2.0/stackblur.min.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">canvas</span> <span class="attr">id</span>=<span class="string">"canvas1"</span>&gt;</span><span class="tag">&lt;/<span class="name">canvas</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span></span><br><span class="line">    var canvas = document.getElementById("canvas1");</span><br><span class="line">    var context = canvas.getContext("2d");</span><br><span class="line">    var imgObj = new Image();</span><br><span class="line">    imgObj.src = '../img.jpg';</span><br><span class="line">    //待图片加载完后，将其显示在canvas上</span><br><span class="line">    imgObj.onload = function () &#123;</span><br><span class="line">        canvas.style.width = this.width + "px";</span><br><span class="line">        canvas.style.height = this.height + "px";</span><br><span class="line">        canvas.width = this.width;</span><br><span class="line">        canvas.height = this.height;</span><br><span class="line">        // 调用drawImage在canvas上绘制此图</span><br><span class="line">        context.drawImage(this, 0, 0, this.width, this.height);</span><br><span class="line">        // 开始监听鼠标事件</span><br><span class="line">        initEventListener();</span><br><span class="line">    &#125;</span><br><span class="line">    function initEventListener() &#123;</span><br><span class="line">        canvas.onmousedown = function (ev) &#123;</span><br><span class="line">            var ev = ev || window.event;</span><br><span class="line">            var dx = ev.clientX - canvas.offsetLeft;</span><br><span class="line">            var dy = ev.clientY - canvas.offsetTop;</span><br><span class="line">            drawLine(dx, dy);</span><br><span class="line">            document.onmousemove = function (ev) &#123;</span><br><span class="line">                var ev = ev || window.event;</span><br><span class="line">                var mx = ev.clientX - canvas.offsetLeft;</span><br><span class="line">                var my = ev.clientY - canvas.offsetTop;</span><br><span class="line">                drawLine(mx, my);</span><br><span class="line">            &#125;;</span><br><span class="line">            document.onmouseup = function () &#123;</span><br><span class="line">                document.onmousemove = null;</span><br><span class="line">                document.onmouseup = null;</span><br><span class="line">            &#125;;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    function drawLine(dx, dy) &#123;</span><br><span class="line">        // 在canvas 距离左上角dx - 15, dy - 15的位置生成一个矩形高斯模糊区域，大小为30*30，模糊半径为10(模糊半径越大打码效果越强)</span><br><span class="line">        StackBlur.canvasRGBA(canvas, dx - 15, dy - 15, 30, 30, 10);</span><br><span class="line">    &#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p><em>方案中描述调用getImageData()后处理像素点的操作由<a href="https://github.com/flozz/StackBlur/blob/master/src/stackblur.js#L441" target="_blank" rel="noopener">StackBlur.canvasRGBA</a>完成</em></p>
+<p>效果：<br><img src="https://user-gold-cdn.xitu.io/2020/1/16/16fac1538feb1839?w=819&amp;h=432&amp;f=gif&amp;s=302292" alt="效果"><br><a href="https://zwlafk.github.io/snippets/canvas/gaussian-blur/plan1.html">demo</a><br><a href="https://github.com/zwlafk/canvas/blob/master/gaussian-blur/plan1.html" target="_blank" rel="noopener">完整代码</a></p>
+<p>虽然能用，但有两个小问题：</p>
+<ol>
+<li>每次只能处理一个矩形，可能圆形更符合设计和体验</li>
+<li>鼠标移动速度过快时，打码路径不连续      </li>
+</ol>
+<p>这两个问题也是可以解决的：   </p>
+<ol>
+<li>第一个问题我们可能要深入<a href="https://www.npmjs.com/package/stackblur-canvas" target="_blank" rel="noopener">stackblur</a>内部，算出需要进行高斯模糊的圆形边界坐标集合，模糊处理时只处理圆内的像素</li>
+<li>第二个问题是由于我们每次处理的区域只是一个点，要解决的话需要丰富一下onmousemove的逻辑，每个点跟之前的点相连，形成一条路径，对连线路径也进行模糊处理    </li>
+</ol>
+<p>这两个问题解决难点在于要计算一系列点坐标确定边界，只对边界内的像素模糊处理，需要用到高中数学知识，勾股定理，相似三角形等，非常的可怕   </p>
+<p><em>接下来是梦回高中环节，可以直接跳过看 <a href="#新的技术方案">新的技术方案</a></em>   </p>
+<p>首先有常量<code>size</code>表示画笔粗细，在mousemove中拿到两个点<code>P1，P2</code>坐标已知，可以确定一条直线l: <code>y=kx+b</code>(为了方便介绍，我们假设这里以P1为原点，即方程为<code>y=kx</code>，实际中要变化坐标系计算)，这条直线延其垂直方向平移<code>正负size/2</code>可以确定两条直线l1，l2，以P1和P2为圆心半径为<code>size/2</code>确定的两个圆记为c1，c2。 l1，l2，c1，c2组成的区域就是我们要确定的待模糊处理的范围，如下图中的胶囊型区域</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/9/16f897b2593246c0?w=906&amp;h=804&amp;f=jpeg&amp;s=143842" alt><br>常量<code>size/2</code>记做<code>r</code>，可以表示圆的半径和直线l平移的距离<br>经过计算，l1 ,l2的方程如下，需要分别讨论k &gt; 0和k &lt; 0的情况:    </p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/9/16f897bedd4174df?w=860&amp;h=152&amp;f=jpeg&amp;s=25460" alt></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/9/16f897c328fd786a?w=854&amp;h=160&amp;f=jpeg&amp;s=24407" alt></p>
+<p>圆的方程根据点坐标<code>(x1, y1)</code>就可以确定:    </p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/9/16f898c2dc1ccbc6?w=288&amp;h=144&amp;f=jpeg&amp;s=10032" alt></p>
+<p>下面举两个🌰:   </p>
+<ul>
+<li>以size=10, P1(0, 0), P2(10, 16)即k&gt;0为例:<br><img src="https://user-gold-cdn.xitu.io/2020/1/9/16f897ba30591d0b?w=1082&amp;h=1036&amp;f=jpeg&amp;s=210051" alt></li>
+<li>以size=10, P1(0, 0), P2(10, -16)即k&lt;0为例:<br><img src="https://user-gold-cdn.xitu.io/2020/1/9/16f897cc1e355912?w=1088&amp;h=1006&amp;f=jpeg&amp;s=202121" alt></li>
+</ul>
+<p>接着在遍历像素点的时候，把坐标代入这四个方程就可以判断该像素点是否在需要模糊的范围内了。   </p>
+<hr>
+<p>我们先知难而退，这个方案暂列为走投无路的最终方案 ,去捡回刚才掀飞的键盘再看一看<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D" target="_blank" rel="noopener">API列表</a>，把目光锁定在<code>线型</code>和<code>路径</code>上：   </p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/9/16f897f1fc0ef6a1?w=1084&amp;h=654&amp;f=jpeg&amp;s=103857" alt></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/9/16f897f77e181a62?w=1354&amp;h=846&amp;f=jpeg&amp;s=176036" alt><br>看起来简直是为解决这两个问题量身定做的，线型端点可以设置成圆形，鼠标经过的轨迹点点相连可以连成一条路径，接下来只要在路径里填充进对应的模糊图像就可以了，<br>可惜绘制路径的相关api中并没有提这种自定义内容的填充，只能对路径进行纯色填充，所以这里的技术方案是无法使用路径来实现需求的    </p>
+<p>那么我们可以以路径为核心来实现需求吗?    </p>
+<p>当然可以，感受一下，上面我们按下鼠标来回划动的时候，像不像在用橡皮擦和刮刮乐，假设这里是刮刮乐的话，如果我们刮出的图像是模糊后的图像那不就大功告成了吗    </p>
+<h2 id="新的技术方案"><a href="#新的技术方案" class="headerlink" title="新的技术方案"></a>新的技术方案</h2><p>我们的新方案是把这个需求当作刮刮乐来做，待刮涂层是原始图像，下面露出的奖项是被高斯模糊处理后的图像，刮开任何位置对应的都是该部位高斯模糊后的图像。    </p>
+<p>接下来我们面临了两个新的问题：     </p>
+<ol>
+<li>在网上众多刮刮乐实现方案中，奖项涂层可以设置\<canvas>的background来实现，也可以创建一个新的\<canvas>来充当，要选哪种方案</canvas></canvas></li>
+<li>新方案下如何得到最终图片数据进行下载上传       </li>
+</ol>
+<p>这就需要我们确定一件事: <a href="https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLCanvasElement/toDataURL" target="_blank" rel="noopener">canvas.toDataURL()</a>是否会连同canvas的background一起生成base64数据，如果不可以那就只能选用第二种刮刮乐方案: 双canvas，借助第三个canvas作为最终的容器，调用drawImage()按顺序写入我们的奖项canvas和涂层canvas，最后对这个容器调用toDataURL()得到base64数据    </p>
+<p>经过测试background是不会写入toDataURL()生成的数据里的，所以我们的最终技术方案可以确定下来:     </p>
+<ol>
+<li>html中创建两个\<canvas> 分别是「涂层」和「奖项」，涂层命名为upper-canvas，奖项层就称为canvas，upper-canvas用绝对定位置于canvas之上</canvas></li>
+<li>图片加载完成后用drawImage把图片写入upper-canvas，用<a href="https://github.com/flozz/StackBlur/blob/master/dist/stackblur.js#L76" target="_blank" rel="noopener">StackBlur.image</a>将图片全部模糊处理后也用drawImage写入canvas</li>
+<li>对upper-canvas赋予刮刮乐功能，具体原理就不讲了，网上一搜一麻袋。主要就是使用路径，结合<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Compositing" target="_blank" rel="noopener">globalCompositeOperation</a>属性，这个属性可以控制画新图形(路径)与已有图形的遮盖策略，通过把它设置为<code>destination-out</code>来实现刮刮乐效果 </li>
+<li>借助一个容器\<canvas>，调用drawImage写入canvas和upper-canvas的图像，这个容器\<canvas>调用toDataURL即可拿到最终图片的base64数据</canvas></canvas></li>
+</ol>
+<p>用代码实现:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"https://cdn.bootcss.com/stackblur-canvas/2.2.0/stackblur.min.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">canvas</span> <span class="attr">id</span>=<span class="string">"canvas"</span>&gt;</span><span class="tag">&lt;/<span class="name">canvas</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">canvas</span> <span class="attr">id</span>=<span class="string">"upper-canvas"</span> <span class="attr">style</span>=<span class="string">"position: absolute; top: 0; left: 0;"</span>&gt;</span><span class="tag">&lt;/<span class="name">canvas</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line">    let upperCanvas = document.getElementById("upper-canvas"),</span><br><span class="line">        upperContext = upperCanvas.getContext("2d");</span><br><span class="line"></span><br><span class="line">        upperContext.lineCap = "round";</span><br><span class="line">        upperContext.lineJoin = "round";</span><br><span class="line">        upperContext.lineWidth = size * 2;</span><br><span class="line">        upperContext.globalCompositeOperation = "destination-out";</span><br><span class="line"></span><br><span class="line">    let x1, y1,//绘制路径的起点坐标</span><br><span class="line">        size = 15;</span><br><span class="line"></span><br><span class="line">    let canvas = document.getElementById("canvas"),</span><br><span class="line">        context = canvas.getContext("2d");</span><br><span class="line">    let img = new Image();</span><br><span class="line">    img.src = '../img.jpg';</span><br><span class="line">    img.onload = function () &#123;</span><br><span class="line">        // 绘入原始图片</span><br><span class="line">        upperCanvas.style.width = this.width + "px";</span><br><span class="line">        upperCanvas.style.height = this.height + "px";</span><br><span class="line">        upperCanvas.width = this.width;</span><br><span class="line">        upperCanvas.height = this.height;</span><br><span class="line">        upperContext.drawImage(this, 0, 0, this.width, this.height);</span><br><span class="line"></span><br><span class="line">        // 模糊处理图片, 绘入底部图片</span><br><span class="line">        StackBlur.image(this, "canvas", 10);</span><br><span class="line"></span><br><span class="line">        tapClip();</span><br><span class="line">    &#125;;</span><br><span class="line">    function getClipArea(e, hastouch) &#123;</span><br><span class="line">        let x = hastouch ? e.targetTouches[0].pageX : e.clientX;</span><br><span class="line">        let y = hastouch ? e.targetTouches[0].pageY : e.clientY;</span><br><span class="line">        let ndom = upperCanvas;</span><br><span class="line">        while (ndom.tagName !== "BODY") &#123;</span><br><span class="line">            x -= ndom.offsetLeft;</span><br><span class="line">            y -= ndom.offsetTop;</span><br><span class="line">            ndom = ndom.parentNode;</span><br><span class="line">        &#125;</span><br><span class="line">        return &#123;</span><br><span class="line">            x: x,</span><br><span class="line">            y: y</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">    function tapClip() &#123;</span><br><span class="line">        let hastouch = "ontouchstart" in window ? true : false,</span><br><span class="line">            tapstart = hastouch ? "touchstart" : "mousedown",</span><br><span class="line">            tapmove = hastouch ? "touchmove" : "mousemove",</span><br><span class="line">            tapend = hastouch ? "touchend" : "mouseup";</span><br><span class="line">        let area;</span><br><span class="line">        let x2, y2;</span><br><span class="line">        upperContext.lineCap = "round";</span><br><span class="line">        upperContext.lineJoin = "round";</span><br><span class="line">        upperContext.lineWidth = size * 2;</span><br><span class="line">        upperContext.globalCompositeOperation = "destination-out";</span><br><span class="line">        upperCanvas.addEventListener(tapstart, function (e) &#123;</span><br><span class="line">            e.preventDefault();</span><br><span class="line">            area = getClipArea(e, hastouch);</span><br><span class="line">            x1 = area.x;</span><br><span class="line">            y1 = area.y;</span><br><span class="line">            drawLine(x1, y1);</span><br><span class="line">            this.addEventListener(tapmove, tapmoveHandler);</span><br><span class="line">            this.addEventListener(tapend, function () &#123;</span><br><span class="line">                this.removeEventListener(tapmove, tapmoveHandler);</span><br><span class="line">            &#125;);</span><br><span class="line">            function tapmoveHandler(e) &#123;</span><br><span class="line">                e.preventDefault();</span><br><span class="line">                area = getClipArea(e, hastouch);</span><br><span class="line">                x2 = area.x;</span><br><span class="line">                y2 = area.y;</span><br><span class="line">                drawLine(x1, y1, x2, y2);</span><br><span class="line">                x1 = x2;</span><br><span class="line">                y1 = y2;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    function drawLine(x1, y1, x2, y2) &#123;</span><br><span class="line">        upperContext.beginPath();</span><br><span class="line">        if (arguments.length == 2) &#123;</span><br><span class="line">            upperContext.arc(x1, y1, size, 0, 2 * Math.PI);</span><br><span class="line">            upperContext.fill();</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            upperContext.moveTo(x1, y1);</span><br><span class="line">            upperContext.lineTo(x2, y2);</span><br><span class="line">            upperContext.stroke();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>借助一个canvas做容器实现下载的代码:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">btn.onclick = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 创建隐藏的可下载链接</span></span><br><span class="line">    <span class="keyword">let</span> eleLink = <span class="built_in">document</span>.createElement(<span class="string">'a'</span>);</span><br><span class="line">    eleLink.download = <span class="string">'filename'</span>;</span><br><span class="line">    eleLink.style.display = <span class="string">'none'</span>;</span><br><span class="line">    <span class="comment">// 创建一个canvas作为临时容器</span></span><br><span class="line">    <span class="keyword">let</span> tempCanvas = <span class="built_in">document</span>.createElement(<span class="string">'canvas'</span>);</span><br><span class="line">    <span class="keyword">let</span> tempContext = tempCanvas.getContext(<span class="string">'2d'</span>);</span><br><span class="line">    tempCanvas.width = upperCanvas.width;</span><br><span class="line">    tempCanvas.height = upperCanvas.height;</span><br><span class="line">    <span class="comment">// 按顺序绘入两层canvas</span></span><br><span class="line">    tempContext.drawImage(canvas, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">    tempContext.drawImage(upperCanvas, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">    <span class="comment">// 图片转base64地址</span></span><br><span class="line">    eleLink.href = tempCanvas.toDataURL(<span class="string">'image/jpeg'</span>);</span><br><span class="line">    <span class="comment">// 触发点击</span></span><br><span class="line">    <span class="built_in">document</span>.body.appendChild(eleLink);</span><br><span class="line">    eleLink.click();</span><br><span class="line">    <span class="comment">// 然后移除链接</span></span><br><span class="line">    <span class="built_in">document</span>.body.removeChild(eleLink);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>有些浏览器是支持<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/filter" target="_blank" rel="noopener">filter属性</a>的, 可以直接实现高斯模糊, 如果你的目标浏览器支持的话, 可以省去引入StackBlur    </p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 模糊处理图片, 绘入底部canvas</span></span><br><span class="line">canvas.style.width = <span class="keyword">this</span>.width + <span class="string">"px"</span>;</span><br><span class="line">canvas.style.height = <span class="keyword">this</span>.height + <span class="string">"px"</span>;</span><br><span class="line">canvas.width = <span class="keyword">this</span>.width;</span><br><span class="line">canvas.height = <span class="keyword">this</span>.height;</span><br><span class="line">context.filter = <span class="string">"blur(10px)"</span>;</span><br><span class="line">context.drawImage(<span class="keyword">this</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="keyword">this</span>.width, <span class="keyword">this</span>.height);</span><br><span class="line"><span class="comment">// StackBlur.image(this, "canvas", 10);</span></span><br></pre></td></tr></table></figure>
+<p>效果:   </p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/15/16fa81f21b0f5e09?w=839&amp;h=451&amp;f=gif&amp;s=1289474" alt></p>
+<p><a href="https://zwlafk.github.io/snippets/canvas/gaussian-blur/gaussian_blur.html">demo</a><br><a href="https://github.com/zwlafk/canvas/blob/master/gaussian-blur/gaussian_blur.html" target="_blank" rel="noopener">完整代码</a></p>
+<p>到这里我们的需求就完全实现了，代码细节方面还很粗糙，方案是完全行得通的    </p>
+<p>这个方案跟第一种方案相比，(这里假设第一种方案实现了😅)第一种方案在同一位置多次点击具有「码上加码」的特性，而刮刮乐方案中鼠标点多少次，模糊程度都是一样的，所以大家如果真的有这种需求，还是要跟产品确认下这个问题的。    </p>
+<p>打码需求就到此为止了🎉，优化下细节就能使用了，如果你要的效果不是高斯模糊，相信你也能按照这个思路完美实现自己的需求，下面我会说说这次调研的一些思考与收获    </p>
+<hr>
+<p>上面提到过drawImage的都可以替换为putImageData，下面我来聊聊他们的区别</p>
+<h2 id="drawImage-VS-putImageData"><a href="#drawImage-VS-putImageData" class="headerlink" title="drawImage VS putImageData"></a>drawImage VS putImageData</h2><p>二者主要区别在于如果要绘制的目标区域已经有了图像，drawImage会在目标区域已有图像上绘制，putImageData则会把目标区域已有图像清空后再绘制。最明显的案例就是如果要绘制一片透明图像到目标位置上，drawImage后整个图像看起来是没有变化的，putImageData后目标位置的图像会被清空。所以上面讲的新的方案里我们借助第三个canvas作为容器，导出数据下载图片时只能使用drawImage，putImageData虽然也保留了透明部分，但是会把下面的模糊图层清空。</p>
+<p>另一个区别在于接收的图源类型不同，<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/drawImage" target="_blank" rel="noopener">drawImage</a>主要接收各种图像类html元素，比如img, video，或者另一个canvas<br><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/putImageData" target="_blank" rel="noopener">putImageData</a>只能接收<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/ImageData" target="_blank" rel="noopener">ImageData</a>作为图源<br>所以可以结合使用场景来选择绘制图片的方法，在处理完ImageData像素数据后直接调用putImageData会很方便(比如方案一)，单纯的希望图像元素变成canvas就直接用drawImage     </p>
+<p><a href="https://jsperf.com/canvas-drawimage-vs-putimagedata/93" target="_blank" rel="noopener">在性能方面drawImage是明显优于putImageData的</a><br>putImageData绘图时会清空目标区域图像，性能又差，但并不能说它一无是处<br>几乎任何图片处理的底层原理都是通过修改ImageData像素数据实现的，而只有putImageData能够将ImageData变成图像，下面我来介绍下ImageData的一些应用</p>
+<h2 id="One-more-thing"><a href="#One-more-thing" class="headerlink" title="One more thing"></a>One more thing</h2><blockquote>
+<p>ImageData 接口描述 \<canvas> 元素的一个隐含像素数据的区域。     </canvas></p>
+</blockquote>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/ImageData" target="_blank" rel="noopener">ImageData</a>的data属性是一个Unit8类型的一维数组, 数组元素是这个图像的每个像素点的rgba值, 所以这个数组中每4个元素表示一个像素点, 分别代表rgba值, 浏览器根据ImageData的width和height属性结合data数组来绘制图像。     </p>
+<p><em>rgba每个维度范围是0-255, 也对应这里的Unit8表示的范围, 即[0, 2^8-1]</em></p>
+<p>上面提到过图片处理的底层原理都是通过修改ImageData像素实现的，下面我来介绍几个相关应用    </p>
+<h3 id="抠图"><a href="#抠图" class="headerlink" title="抠图"></a>抠图</h3><p>通过遍历图像每个像素点，与目标像素对比，符合条件的就把当前的像素点rgba中的a设为0，即透明度完全透明，得到一个新的ImageData，调用putImageData把新的ImageData绘入canvas即可<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">imgObj.onload = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    canvas.style.width = <span class="keyword">this</span>.width + <span class="string">"px"</span>;</span><br><span class="line">    canvas.style.height = <span class="keyword">this</span>.height + <span class="string">"px"</span>;</span><br><span class="line">    canvas.width = <span class="keyword">this</span>.width;</span><br><span class="line">    canvas.height = <span class="keyword">this</span>.height;</span><br><span class="line">    context.drawImage(<span class="keyword">this</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="keyword">this</span>.width, <span class="keyword">this</span>.height);</span><br><span class="line">    <span class="keyword">var</span> modifyImgData = context.getImageData(<span class="number">0</span>, <span class="number">0</span>, canvas.width, canvas.height);</span><br><span class="line">    <span class="keyword">var</span> modifyPxData = modifyImgData.data;</span><br><span class="line">    <span class="keyword">let</span> l = modifyPxData.length / <span class="number">4</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; l; i++) &#123;</span><br><span class="line">        <span class="keyword">let</span> r = modifyPxData[i * <span class="number">4</span> + <span class="number">0</span>];</span><br><span class="line">        <span class="keyword">let</span> g = modifyPxData[i * <span class="number">4</span> + <span class="number">1</span>];</span><br><span class="line">        <span class="keyword">let</span> b = modifyPxData[i * <span class="number">4</span> + <span class="number">2</span>];</span><br><span class="line">        <span class="keyword">if</span> (r &gt; <span class="number">100</span> &amp;&amp; g &gt; <span class="number">120</span> &amp;&amp; b &gt; <span class="number">120</span>)</span><br><span class="line">            modifyPxData[i * <span class="number">4</span> + <span class="number">3</span>] = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    context.putImageData(modifyImgData, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面的代码我抠掉了一张图片中<code>r &gt; 100 &amp;&amp; g &gt; 120 &amp;&amp; b &gt; 120</code>的像素，大概就是图中的天空，效果如下:        </p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/16/16fac2bb803e4a6f?w=1438&amp;h=1572&amp;f=jpeg&amp;s=260602" alt><br><a href="https://github.com/zwlafk/canvas/blob/master/koutu.html" target="_blank" rel="noopener">完整代码</a><br><em>以后可以自己换证件照底色了</em></p>
+<h3 id="千图成像"><a href="#千图成像" class="headerlink" title="千图成像"></a>千图成像</h3><p><a href="https://en.wikipedia.org/wiki/Photographic_mosaic" target="_blank" rel="noopener">Photographic mosaic</a>，经典的案例就是<a href="https://bkimg.cdn.bcebos.com/pic/6159252dd42a283497b0a9d35db5c9ea14cebfd0@wm_1,g_7,k_d2F0ZXIvYmFpa2UyNzI=,xp_5,yp_5" target="_blank" rel="noopener">楚门的世界电影海报</a>      </p>
+<p>了解过ImageData后在看这种图片，可以想像一下是把许多子图片作为一个个像素拼起来。这些子图片在缩小到一定程度时会表现出一个主要颜色，这个颜色与原图对应像素的rgb值越接近最终效果就越好。 所以这个需求实现起来需要先获取原图的ImageData，遍历每个像素点，获取该点的rgb值，以此值为标准，在子图库里寻找颜色最接近的子图<br>对于如何计算子图代表的颜色，以及颜色相近的判断标准是什么，我是这样想的(可能并不正确):      </p>
+<ul>
+<li>获取子图的ImageData，遍历像素数据，把每个像素的rgb累加后求和，得到一个平均值r，平均值g，平均值b，这个平均值代表这张图作为像素点时的颜色表现</li>
+<li>判断颜色相近的办法，对于rgb表示的颜色来说，rgb就像三个维度，可以构建成一个立方体，两点之间的距离即可表示颜色差异程度，计算方法和立体几何中一样(求三段距离平方和再开方): <code>Math.sqrt(dr ** 2 + dg ** 2 + db ** 2)</code>     </li>
+</ul>
+<p><em>这里我使用rgb模型来计算颜色差异程度，换成hsv模型来计算会更精确</em><br><em>最终效果跟子图片质量也有关，子图片颜色越均匀效果越好</em>   </p>
+<p>接下来就是把拿到的子图绘入新的大图里，所有的原始像素遍历完成, 这张大图就拼好了    </p>
+<p><em>为了减少计算量可以把子图和原图压缩一下，比如原图800x800，在不允许子图重复的情况下组成他需要64万张子图，如果每张子图是20x20的，那么最终的结果图片就是16000x16000(按上面我们提到的1个像素4bytes来算，这张图大小约为0.9G，生成jpg或png会更大)。如果把原图压缩至40x40，就需要1600张子图，子图压缩至20x20，最终图片就是800x800。 效果当然是不压缩比较好，但这取决于你是否有这么多子图，生成速度也依赖计算机性能</em>     </p>
+<p>下面是我把一张800x800的图片按照40x40的分辨率，子图为20x20生成了一张效果图，由于图源是从百度图片的接口爬来的，数量有限，这里我按照可以重复使用的策略来生成，所以效果并不太好，不过有个“造假”的办法，就是把原图设置一定的透明度再画到结果图上。   </p>
+<p>下图左至右分别是 原图，结果图，造假图：    </p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/9/16f8a1dff35481ef?w=2452&amp;h=820&amp;f=jpeg&amp;s=902520" alt><br>这里我用了百度图片的搜索接口来获取子图源，为了把请求来的图片数据落地到本地以方便调用，而且要进行大量的计算，这部分我就用nodejs来写了。node只是js的运行环境，没有创建DOM和使用DOM api的能力，所以需要额外安装<a href="https://www.npmjs.com/package/canvas" target="_blank" rel="noopener">canvas</a>库来满足需要，用法和在浏览器上是一样的，<a href="https://github.com/zwlafk/canvas/tree/master/photo-mosaik" target="_blank" rel="noopener">完整代码</a>   </p>
+<p>我感觉做好这几点会有更好的效果：    </p>
+<ul>
+<li>判断颜色相近的策略(子图rgb平均值代表它作为像素的颜色是否科学；计算颜色差异程度时使用hsv模型替代rgb模型)</li>
+<li>子图片颜色最好均匀</li>
+<li>结果与原图的压缩程度尽可能小</li>
+<li>我的方案还很不成熟，子图全部截成了正方形以方便与原图像素一一对应，会不会有算法可以使用一张子图对应上多个原图像素点</li>
+</ul>
+<h3 id="「绿幕」"><a href="#「绿幕」" class="headerlink" title="「绿幕」"></a>「绿幕」</h3><p>这里是<a href="https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Manipulating_video_using_canvas" target="_blank" rel="noopener">MDN上介绍的应用</a>，主要是利用了drawImage可以用video作为图像源这一特点，对视频的每一帧做处理，把每帧的ImageData中特定色值(绿色)的像素透明度替换为0(完全透明)，再画到另一个canvas上，就实现了以特定图像替换「绿幕」的效果，利用这个思路我把两个视频合成起来:    </p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/9/16f8a303b8f62948?w=472&amp;h=761&amp;f=gif&amp;s=4363867" alt><br><a href="https://zwlafk.github.io/snippets/canvas/green-screen/demo.html">demo</a><br><a href="https://github.com/zwlafk/canvas/blob/master/green-screen/demo.html" target="_blank" rel="noopener">完整代码</a>    </p>
+<p><em>联想一下一些播放器的导入字幕功能，可能也是这个原理把字幕绘制到正在播放的视频上的</em></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>最初拿到需求一顿百度谷歌，想找一个第三方插件来实现，现在回过头看实现起来是很简单的。自我反省一下长久以来的调包侠行为让自己变得不重视思考，以后用包或框架还是需要结合需求认真思考下是不是真的需要它。（如果当时找到了插件那也香啊）    </p>
+<p>最后这部分小功能的介绍 意义并不在于前端也能把p图，抠图，视频合成之类的功能搬到浏览器上，我觉得更多在于了解这些功能背后的原理，了解ps和视频剪辑软件是如何工作的，毕竟这些操作在浏览器上会占用很高的CPU和GPU，不过随着网络和硬件设备的不断升级，相信有一天这些功能也能在浏览器上流畅的运行</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Glossary/Canvas" target="_blank" rel="noopener">https://developer.mozilla.org/zh-CN/docs/Glossary/Canvas</a></li>
+<li><a href="https://github.com/flozz/StackBlur/blob/master/src/stackblur.js" target="_blank" rel="noopener">https://github.com/flozz/StackBlur/blob/master/src/stackblur.js</a></li>
+<li><a href="https://www.cnblogs.com/puyongsong/p/6027533.html" target="_blank" rel="noopener">https://www.cnblogs.com/puyongsong/p/6027533.html</a></li>
+<li><a href="https://juejin.im/post/5bdeb357e51d4536140fc7df" target="_blank" rel="noopener">https://juejin.im/post/5bdeb357e51d4536140fc7df</a></li>
+<li><a href="https://github.com/WebKit/webkit/blob/master/Source/WebCore/html/HTMLCanvasElement.cpp" target="_blank" rel="noopener">https://github.com/WebKit/webkit/blob/master/Source/WebCore/html/HTMLCanvasElement.cpp</a></li>
+<li><a href="https://stackoverflow.com/questions/7721898/is-putimagedata-faster-than-drawimage" target="_blank" rel="noopener">https://stackoverflow.com/questions/7721898/is-putimagedata-faster-than-drawimage</a></li>
+<li><a href="https://blog.csdn.net/qidu1998/article/details/79062663" target="_blank" rel="noopener">https://blog.csdn.net/qidu1998/article/details/79062663</a></li>
+</ul>
+<hr>
+<p><a href="https://github.com/zwlafk/canvas" target="_blank" rel="noopener">github地址</a></p>
+
+        
+      </div>
+      
+      
+      
+    </div>
+    
+    
+    
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image" src="/images/me.jpeg" alt="zwlafk">
+          
+            <p class="site-author-name" itemprop="name">zwlafk</p>
+            <p class="site-description motion-element" itemprop="description">前端</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/zwlafk" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/your-user-name" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-globe"></i>微博</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#【canvas】记一次图片打码需求调研"><span class="nav-number">1.</span> <span class="nav-text">【canvas】记一次图片打码需求调研</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#canvas"><span class="nav-number">1.1.1.</span> <span class="nav-text">canvas</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#快速介绍"><span class="nav-number">1.1.2.</span> <span class="nav-text">快速介绍</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#技术方案"><span class="nav-number">1.2.</span> <span class="nav-text">技术方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#新的技术方案"><span class="nav-number">1.3.</span> <span class="nav-text">新的技术方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#drawImage-VS-putImageData"><span class="nav-number">1.4.</span> <span class="nav-text">drawImage VS putImageData</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#One-more-thing"><span class="nav-number">1.5.</span> <span class="nav-text">One more thing</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#抠图"><span class="nav-number">1.5.1.</span> <span class="nav-text">抠图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#千图成像"><span class="nav-number">1.5.2.</span> <span class="nav-text">千图成像</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#「绿幕」"><span class="nav-number">1.5.3.</span> <span class="nav-text">「绿幕」</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">1.6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">1.7.</span> <span class="nav-text">参考</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zwlafk</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
