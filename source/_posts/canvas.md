@@ -38,7 +38,7 @@ tags:
 ```
 上面这段代码就是获取canvas2d上下文后调用了[fillRect](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/fillRect)在&lt;canvas>上绘制了一个矩形，位置在&lt;canvas>的左上起(25，25)处，长宽为100，默认颜色是#000   
 
-![](https://user-gold-cdn.xitu.io/2020/1/10/16f8df51f021337d?w=382&h=396&f=jpeg&s=20823)    
+![](https://raw.githubusercontent.com/zwlafk/canvas/master/assets/16f8df51f021337d.jpg)    
 除了绘制矩形外，这个渲染上下文还提供了其他许多[API](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D)用以实现各种绘图需求，比如绘制文本、**绘制路径、绘制图像、像素控制**、旋转变换等，接下来我只在用到的时候介绍他们。    
 
 ## 技术方案   
@@ -106,7 +106,7 @@ tags:
 *方案中描述调用getImageData()后处理像素点的操作由[StackBlur.canvasRGBA](https://github.com/flozz/StackBlur/blob/master/src/stackblur.js#L441)完成*
 
 效果：
-![效果](https://user-gold-cdn.xitu.io/2020/1/16/16fac1538feb1839?w=819&h=432&f=gif&s=302292)    
+![效果](https://raw.githubusercontent.com/zwlafk/canvas/master/assets/16fac1538feb1839.gif)    
 [demo](https://zwlafk.github.io/snippets/canvas/gaussian-blur/plan1.html)    
 [完整代码](https://github.com/zwlafk/canvas/blob/master/gaussian-blur/plan1.html)
 
@@ -124,23 +124,23 @@ tags:
 
 首先有常量`size`表示画笔粗细，在mousemove中拿到两个点`P1，P2`坐标已知，可以确定一条直线l: `y=kx+b`(为了方便介绍，我们假设这里以P1为原点，即方程为`y=kx`，实际中要变化坐标系计算)，这条直线延其垂直方向平移`正负size/2`可以确定两条直线l1，l2，以P1和P2为圆心半径为`size/2`确定的两个圆记为c1，c2。 l1，l2，c1，c2组成的区域就是我们要确定的待模糊处理的范围，如下图中的胶囊型区域
 
-![](https://user-gold-cdn.xitu.io/2020/1/9/16f897b2593246c0?w=906&h=804&f=jpeg&s=143842)
+![](https://raw.githubusercontent.com/zwlafk/canvas/master/assets/16f897b2593246c0.jpg)
 常量`size/2`记做`r`，可以表示圆的半径和直线l平移的距离    
 经过计算，l1 ,l2的方程如下，需要分别讨论k > 0和k < 0的情况:    
 
-![](https://user-gold-cdn.xitu.io/2020/1/9/16f897bedd4174df?w=860&h=152&f=jpeg&s=25460)
+![](https://raw.githubusercontent.com/zwlafk/canvas/master/assets/16f897bedd4174df.jpg)
 
-![](https://user-gold-cdn.xitu.io/2020/1/9/16f897c328fd786a?w=854&h=160&f=jpeg&s=24407)
+![](https://raw.githubusercontent.com/zwlafk/canvas/master/assets/16f897c328fd786a.jpg)
 
 圆的方程根据点坐标`(x1, y1)`就可以确定:    
 
-![](https://user-gold-cdn.xitu.io/2020/1/9/16f898c2dc1ccbc6?w=288&h=144&f=jpeg&s=10032)
+![](https://raw.githubusercontent.com/zwlafk/canvas/master/assets/16f898c2dc1ccbc6.jpg)
 
 下面举两个🌰:   
 - 以size=10, P1(0, 0), P2(10, 16)即k>0为例: 
-![](https://user-gold-cdn.xitu.io/2020/1/9/16f897ba30591d0b?w=1082&h=1036&f=jpeg&s=210051)
+![](https://raw.githubusercontent.com/zwlafk/canvas/master/assets/16f897ba30591d0b.jpg)
 - 以size=10, P1(0, 0), P2(10, -16)即k<0为例: 
-![](https://user-gold-cdn.xitu.io/2020/1/9/16f897cc1e355912?w=1088&h=1006&f=jpeg&s=202121)
+![](https://raw.githubusercontent.com/zwlafk/canvas/master/assets/16f897cc1e355912.jpg)
 
 接着在遍历像素点的时候，把坐标代入这四个方程就可以判断该像素点是否在需要模糊的范围内了。   
 
@@ -148,9 +148,9 @@ tags:
 
 我们先知难而退，这个方案暂列为走投无路的最终方案 ,去捡回刚才掀飞的键盘再看一看[API列表](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D)，把目光锁定在`线型`和`路径`上：   
 
-![](https://user-gold-cdn.xitu.io/2020/1/9/16f897f1fc0ef6a1?w=1084&h=654&f=jpeg&s=103857)
+![](https://raw.githubusercontent.com/zwlafk/canvas/master/assets/16f897f1fc0ef6a1.jpg)
 
-![](https://user-gold-cdn.xitu.io/2020/1/9/16f897f77e181a62?w=1354&h=846&f=jpeg&s=176036)
+![](https://raw.githubusercontent.com/zwlafk/canvas/master/assets/16f897f77e181a62.jpg)
 看起来简直是为解决这两个问题量身定做的，线型端点可以设置成圆形，鼠标经过的轨迹点点相连可以连成一条路径，接下来只要在路径里填充进对应的模糊图像就可以了，
 可惜绘制路径的相关api中并没有提这种自定义内容的填充，只能对路径进行纯色填充，所以这里的技术方案是无法使用路径来实现需求的    
 
@@ -307,7 +307,7 @@ context.drawImage(this, 0, 0, this.width, this.height);
 ```
 效果:   
 
-![](https://user-gold-cdn.xitu.io/2020/1/15/16fa81f21b0f5e09?w=839&h=451&f=gif&s=1289474)
+![](https://raw.githubusercontent.com/zwlafk/canvas/master/assets/16fa81f21b0f5e09.gif)
 
 [demo](https://zwlafk.github.io/snippets/canvas/gaussian-blur/gaussian_blur.html)     
 [完整代码](https://github.com/zwlafk/canvas/blob/master/gaussian-blur/gaussian_blur.html)
@@ -365,7 +365,7 @@ imgObj.onload = function () {
 上面的代码我抠掉了一张图片中`r > 100 && g > 120 && b > 120`的像素，大概就是图中的天空，效果如下:        
 
 
-![](https://user-gold-cdn.xitu.io/2020/1/16/16fac2bb803e4a6f?w=1438&h=1572&f=jpeg&s=260602)   
+![](https://raw.githubusercontent.com/zwlafk/canvas/master/assets/16fac2bb803e4a6f.jpg)   
 [完整代码](https://github.com/zwlafk/canvas/blob/master/koutu.html)    
 *以后可以自己换证件照底色了*
 ### 千图成像
@@ -387,7 +387,7 @@ imgObj.onload = function () {
 
 下图左至右分别是 原图，结果图，造假图：    
 
-![](https://user-gold-cdn.xitu.io/2020/1/9/16f8a1dff35481ef?w=2452&h=820&f=jpeg&s=902520)
+![](https://raw.githubusercontent.com/zwlafk/canvas/master/assets/16f8a1dff35481ef.jpg)
 这里我用了百度图片的搜索接口来获取子图源，为了把请求来的图片数据落地到本地以方便调用，而且要进行大量的计算，这部分我就用nodejs来写了。node只是js的运行环境，没有创建DOM和使用DOM api的能力，所以需要额外安装[canvas](https://www.npmjs.com/package/canvas)库来满足需要，用法和在浏览器上是一样的，[完整代码](https://github.com/zwlafk/canvas/tree/master/photo-mosaik)   
 
 我感觉做好这几点会有更好的效果：    
@@ -400,7 +400,7 @@ imgObj.onload = function () {
 ### 「绿幕」
 这里是[MDN上介绍的应用](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Manipulating_video_using_canvas)，主要是利用了drawImage可以用video作为图像源这一特点，对视频的每一帧做处理，把每帧的ImageData中特定色值(绿色)的像素透明度替换为0(完全透明)，再画到另一个canvas上，就实现了以特定图像替换「绿幕」的效果，利用这个思路我把两个视频合成起来:    
 
-![](https://user-gold-cdn.xitu.io/2020/1/9/16f8a303b8f62948?w=472&h=761&f=gif&s=4363867)     
+![](https://raw.githubusercontent.com/zwlafk/canvas/master/assets/16f8a303b8f62948.gif)     
 [demo](https://zwlafk.github.io/snippets/canvas/green-screen/demo.html)      
 [完整代码](https://github.com/zwlafk/canvas/blob/master/green-screen/demo.html)    
 
